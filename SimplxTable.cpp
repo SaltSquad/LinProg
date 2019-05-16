@@ -105,7 +105,8 @@ void SimplxTable::clear() {
 	delete[] m_limits;
 	delete	 m_objFunc;
 	delete[] m_delta;
-
+	delete[] m_bp;
+	delete[] m_fp;
 	N = M = 0;
 }
 
