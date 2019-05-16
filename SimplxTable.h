@@ -96,5 +96,8 @@ private:
 
 	std::string* m_bp;		// базисные переменные
 	std::string* m_fp;		// свободные переменные
+	// идентификаторы для 
+	std::string* bp;		// баз. перем.[M]
+	std::string* fp;		// своб. перем.[N]
 };
 
