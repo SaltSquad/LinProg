@@ -4,6 +4,19 @@
 #include <iostream>
 using namespace std;
 
+size_t ind_min(double* begin, size_t N) {
+	size_t ind = 0;
+	double min = *begin;
+	for (size_t i  = 1; i < N; i++)
+		if (begin[i] < min)
+		{
+			ind = i;
+			min = begin[i];
+		}
+
+	return ind;
+}
+
 void SimplxTable::ObjFunc::parseStr(std::string line) {
 	// ввод хуйни
 	size_t rht, lft = 0;
@@ -39,6 +52,10 @@ SimplxTable::SimplxTable(const SimplxTable& obj_)
 		for (size_t j = 0; j < M; j++)
 			m_matrx[i][j] = obj_.m_matrx[i][j];
 	}
+}
+
+SimplxTable::SimplxTable(size_t test) {
+	// TODO:
 }
 
 void SimplxTable::setupFile(const char* fname) {
@@ -87,7 +104,7 @@ void SimplxTable::setupFile(const char* fname) {
 }
 
 
-void SimplxTable::print() {
+void SimplxTable::print() const {
 	
 }
 
@@ -95,6 +112,17 @@ void SimplxTable::print() {
 SimplxTable::~SimplxTable()
 {
 	clear();
+}
+
+void SimplxTable::setStrings() {
+	m_bp = new string[M];
+	m_fp = new string[N];
+
+	for (size_t i = 0; i < N; i++)
+		m_fp[i] = ("x" + to_string(i + 1));
+
+	for (size_t i = 0; i < M; i++)
+		m_bp[i] = ("x" + to_string(N + i + 1));
 }
 
 void SimplxTable::clear() {
@@ -115,7 +143,22 @@ void SimplxTable::parseLimit(string line, size_t ind) {
 }
 
 SimplxTable::ObjFunc simplx_method(SimplxTable table) {
-	SimplxTable::ObjFunc a;
-	return a;
+	while (!table.m_objFunc->isFinished()) {
+
+		size_t ind_row = table.m_objFunc->indObjRow();
+		size_t count = table.M;
+
+		// заполняем дельта, деля значение limit на элементы
+		// разрешающего столбца
+		for (size_t i = 0; i < count; i++)
+			table.m_delta[i] = table.m_limits[i] / table.m_matrx[i][ind_row];
+
+		size_t ind_line = ind_min(table.m_delta, count);
+		double obj_elem = table.m_matrx[ind_line][ind_row];	// разрешающий элемент
+
+
+		for (size_t i = 0; i < table.N; i++)
+			if (i != )
+	}
 }
 

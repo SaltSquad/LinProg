@@ -14,6 +14,7 @@
  *		
  */
 enum Mod {MIN, MAX};
+size_t ind_min(double*, size_t);
 class SimplxTable
 {
 	class ObjFunc
@@ -75,12 +76,14 @@ class SimplxTable
 public:
 	SimplxTable();
 	SimplxTable(const SimplxTable& obj_);
+	SimplxTable(size_t test);
 
 	void setupFile(const char* fname);
-	void print();	// TODO:
+	void print() const;	// TODO:
 	friend ObjFunc simplx_method(SimplxTable table); // TODO: Хуйня которое всё исполняет
 	~SimplxTable();
 private:
+	void setStrings();	// иниц. bp, fp
 	void clear();
 	void parseLimit(std::string line, size_t ind);	// TODO: заполнить матрицу и другие поля по инфе из строки
 
@@ -93,11 +96,8 @@ private:
 
 	ObjFunc*	m_objFunc;	// коэф. целевой ф.-ии[M + 1]
 	double*		m_delta;	// хуйня какая-то[N]
-
-	std::string* m_bp;		// базисные переменные
-	std::string* m_fp;		// свободные переменные
 	// идентификаторы для 
-	std::string* bp;		// баз. перем.[M]
-	std::string* fp;		// своб. перем.[N]
+	std::string* m_bp;		// баз. перем.[M]
+	std::string* m_fp;		// своб. перем.[N]
 };
 
