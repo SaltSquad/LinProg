@@ -206,7 +206,11 @@ pair<size_t, size_t> SimplxTable::madMax() {
 }
 
 void SimplxTable::kizaroo(size_t i, size_t j) {
-	
+	// правило прямоугольника
+	std::swap<string>(m_bp[i], m_fp[j]);
+
+	double obj_elem = 1.0 / m_matrx[i][j];
+
 }
 
 SimplxTable::ObjFunc simplx_method(SimplxTable table) {
@@ -214,10 +218,7 @@ SimplxTable::ObjFunc simplx_method(SimplxTable table) {
 		pair<size_t, size_t> konteiner = table.madMax();	// пересчет таблицы
 		
 		table.kizaroo(konteiner.first, konteiner.second);
-		std::swap<string>(table.m_bp[konteiner.first], table.m_fp[konteiner.second]);
-
-		double obj_elem = 1.0 / table.m_matrx[konteiner.first][konteiner.second];
-
+		
 		
 		for (size_t i = 0; i < )
 		// правило прямоугольника
