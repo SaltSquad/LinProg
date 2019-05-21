@@ -54,12 +54,14 @@ class SimplxTable
 		}
 
 		double getResult() const { return result; }
+		void setResult(double d) { result = d; }
 		void setMod(Mod mod_) {
 			if (mod == MAX)
 				mod_func = [](double x, double y) {return x > y; };
 			else
 				mod_func = [](double x, double y) {return x < y; };
 		}
+
 		friend std::ostream& operator << (std::ostream& out, ObjFunc obj_) {
 			// TODO:
 
@@ -86,7 +88,8 @@ private:
 	void setStrings();	// иниц. bp, fp
 	void clear();
 	void parseLimit(std::string line, size_t ind);	// TODO: заполнить матрицу и другие поля по инфе из строки
-	void madMax();
+	std::pair<size_t, size_t> madMax();
+	void kizaroo(size_t i, size_t j);
 private:
 	size_t N;	// кол.-во свободных переменных
 	size_t M;	// кол.-во базисных\ограничений

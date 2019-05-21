@@ -177,7 +177,7 @@ void SimplxTable::parseLimit(string line, size_t ind) {
 	
 }
 
-void SimplxTable::madMax() {
+pair<size_t, size_t> SimplxTable::madMax() {
 	size_t ind_row = m_objFunc->indObjRow();
 	size_t count = M;
 
@@ -202,12 +202,25 @@ void SimplxTable::madMax() {
 		if (i != ind_line)
 			m_matrx[i][ind_row] /= -obj_elem;
 
+	return {ind_line, ind_row};
+}
+
+void SimplxTable::kizaroo(size_t i, size_t j) {
+	
 }
 
 SimplxTable::ObjFunc simplx_method(SimplxTable table) {
 	while (!table.m_objFunc->isFinished()) {
-		table.madMax();	// пересчет таблицы
+		pair<size_t, size_t> konteiner = table.madMax();	// пересчет таблицы
 		
+		table.kizaroo(konteiner.first, konteiner.second);
+		std::swap<string>(table.m_bp[konteiner.first], table.m_fp[konteiner.second]);
+
+		double obj_elem = 1.0 / table.m_matrx[konteiner.first][konteiner.second];
+
+		
+		for (size_t i = 0; i < )
+		// правило прямоугольника
 	}
 
 }
