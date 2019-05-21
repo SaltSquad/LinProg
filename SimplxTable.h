@@ -86,7 +86,7 @@ private:
 	void setStrings();	// иниц. bp, fp
 	void clear();
 	void parseLimit(std::string line, size_t ind);	// TODO: заполнить матрицу и другие поля по инфе из строки
-
+	void madMax();
 private:
 	size_t N;	// кол.-во свободных переменных
 	size_t M;	// кол.-во базисных\ограничений

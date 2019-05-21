@@ -54,8 +54,43 @@ SimplxTable::SimplxTable(const SimplxTable& obj_)
 	}
 }
 
-SimplxTable::SimplxTable(size_t test) {
-	// TODO:
+SimplxTable::SimplxTable(size_t test)
+	: N(4), M(3), m_matrx(new double*[N]),
+	m_limits(new double[N]), m_delta(new double[N]), m_objFunc(new ObjFunc(3))
+{
+
+	for (size_t i = 0; i < N; i++)
+		m_matrx[i] = new double[M];
+
+	for (size_t i = 0; i < N; i++)
+	{
+		m_limits[i] = m_limits[i];
+		m_delta[i] = m_delta[i];
+		for (size_t j = 0; j < M; j++)
+			m_matrx[i][j] = m_matrx[i][j];
+	}
+
+	m_limits[0] = 180;
+	m_limits[1] = 210;
+	m_limits[2] = 244;
+	m_limits[3] = 0;
+
+	m_matrx[0][0] = 4;
+	m_matrx[0][1] = 2;
+	m_matrx[0][2] = 1;
+
+	m_matrx[1][0] = 3;
+	m_matrx[1][1] = 1;
+	m_matrx[1][2] = 3;
+
+	m_matrx[2][0] = 1;
+	m_matrx[2][1] = 2;
+	m_matrx[2][2] = 5;
+
+	m_objFunc[0] = -10;
+	m_objFunc[1] = -14;
+	m_objFunc[2] = -12;
+
 }
 
 void SimplxTable::setupFile(const char* fname) {
@@ -142,23 +177,38 @@ void SimplxTable::parseLimit(string line, size_t ind) {
 	
 }
 
+void SimplxTable::madMax() {
+	size_t ind_row = m_objFunc->indObjRow();
+	size_t count = M;
+
+	// заполняем дельта, деля значение limit на элементы
+	// разрешающего столбца
+	for (size_t i = 0; i < count; i++)
+		m_delta[i] = m_limits[i] / m_matrx[i][ind_row];
+
+	size_t ind_line = ind_min(m_delta, count);
+	double obj_elem = m_matrx[ind_line][ind_row];	// разрешающий элемент
+
+	m_matrx[ind_line][ind_row] = 1.0 / obj_elem;
+	m_limits[ind_line] /= obj_elem;
+
+
+	for (size_t i = 0; i < N; i++)
+		if (i != ind_row)
+			m_matrx[ind_line][i] /= obj_elem;
+
+	(*m_objFunc)[ind_row] /= -obj_elem;
+	for (size_t i = 0; i < M; i++)
+		if (i != ind_line)
+			m_matrx[i][ind_row] /= -obj_elem;
+
+}
+
 SimplxTable::ObjFunc simplx_method(SimplxTable table) {
 	while (!table.m_objFunc->isFinished()) {
-
-		size_t ind_row = table.m_objFunc->indObjRow();
-		size_t count = table.M;
-
-		// заполняем дельта, деля значение limit на элементы
-		// разрешающего столбца
-		for (size_t i = 0; i < count; i++)
-			table.m_delta[i] = table.m_limits[i] / table.m_matrx[i][ind_row];
-
-		size_t ind_line = ind_min(table.m_delta, count);
-		double obj_elem = table.m_matrx[ind_line][ind_row];	// разрешающий элемент
-
-
-		for (size_t i = 0; i < table.N; i++)
-			if (i != )
+		table.madMax();	// пересчет таблицы
+		
 	}
+
 }
 
