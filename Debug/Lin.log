@@ -1,0 +1,6 @@
+﻿  SimplxTable.cpp
+c:\users\создатель\desktop\code\cpp\artem\lin\lin\simplxtable.h(34): warning C4244: =: преобразование "double" в "size_t", возможна потеря данных
+  Source.cpp
+c:\users\создатель\desktop\code\cpp\artem\lin\lin\simplxtable.h(34): warning C4244: =: преобразование "double" в "size_t", возможна потеря данных
+  Создание кода...
+  Lin.vcxproj -> C:\Users\Создатель\Desktop\code\CPP\Artem\Lin\Debug\Lin.exe

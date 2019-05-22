@@ -1,6 +1,7 @@
 #pragma once
 #include <algorithm>
 #include <functional>
+#include <iostream>
 /*ФОРМАТ ВВОДА ДАННЫХ:
  * 1) кол.-во переменных в F
  * 2) f1 f2 ... fn min\max
@@ -15,6 +16,7 @@
  */
 enum Mod {MIN, MAX};
 size_t ind_min(double*, size_t);
+void swap(std::string&, std::string&);
 class SimplxTable
 {
 	class ObjFunc
@@ -33,6 +35,7 @@ class SimplxTable
 
 		void parseStr(std::string line);
 		double& operator [](const size_t i) { return koef[i]; }
+		const double& operator [](const size_t i) const  { return koef[i]; }
 		
 		bool isFinished() const {
 			return std::all_of(koef, koef + N, [](double x) {return x >= 0; });
@@ -62,9 +65,15 @@ class SimplxTable
 				mod_func = [](double x, double y) {return x < y; };
 		}
 
+
 		friend std::ostream& operator << (std::ostream& out, ObjFunc obj_) {
 			// TODO:
-
+			for (size_t i = 0; i < obj_.N; i++)
+				out <<"\t[" << i+1 << "]:\t" << obj_.koef[i] << '\n';
+			out << "\tF(";
+			for (size_t i = 0; i < obj_.N; i++)
+				out << "x_" << i + 1 << ' ';
+			out << ") = " << obj_.result << std::endl;
 			return out;
 		}
 	private:
@@ -81,15 +90,16 @@ public:
 	SimplxTable(size_t test);
 
 	void setupFile(const char* fname);
-	void print() const;	// TODO:
-	friend ObjFunc simplx_method(SimplxTable table); // TODO: Хуйня которое всё исполняет
+	void print() const;
+	friend ObjFunc simplx_method(SimplxTable table);
 	~SimplxTable();
 private:
 	void setStrings();	// иниц. bp, fp
 	void clear();
 	void parseLimit(std::string line, size_t ind);	// TODO: заполнить матрицу и другие поля по инфе из строки
-	std::pair<size_t, size_t> madMax();
-	void kizaroo(size_t i, size_t j);
+	void madMax(std::pair<size_t, size_t>);
+	std::pair<size_t, size_t> initDelta();
+	void kizaroo2(size_t indL, size_t indR);
 private:
 	size_t N;	// кол.-во свободных переменных
 	size_t M;	// кол.-во базисных\ограничений

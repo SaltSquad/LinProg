@@ -17,6 +17,21 @@ size_t ind_min(double* begin, size_t N) {
 	return ind;
 }
 
+void swap(string& a, string& b) {
+	string c = a;
+	a = b;
+	b = c;
+}
+
+SimplxTable::ObjFunc::ObjFunc(const ObjFunc& obj_) 
+	: N(obj_.N), koef(new double[N]), result(obj_.result),
+		mod_func(obj_.mod_func), mod(obj_.mod)
+{
+	for (size_t i = 0; i < N; i++)
+		koef[i] = obj_.koef[i];
+}
+
+
 void SimplxTable::ObjFunc::parseStr(std::string line) {
 	// ввод хуйни
 	size_t rht, lft = 0;
@@ -39,7 +54,8 @@ SimplxTable::SimplxTable()
 
 SimplxTable::SimplxTable(const SimplxTable& obj_)
 	: N(obj_.N), M(obj_.M), m_matrx(new double*[N]),
-	 m_limits(new double[N]), m_delta(new double[N])
+	 m_limits(new double[N]), m_delta(new double[N]), m_bp(new string[M]),
+	m_fp(new string[N])
 {
 	m_objFunc = new ObjFunc(*obj_.m_objFunc);
 	for (size_t i = 0; i < N; i++)
@@ -52,15 +68,24 @@ SimplxTable::SimplxTable(const SimplxTable& obj_)
 		for (size_t j = 0; j < M; j++)
 			m_matrx[i][j] = obj_.m_matrx[i][j];
 	}
+	for (size_t i = 0; i < N; i++)
+		m_fp[i] = obj_.m_fp[i];
+
+	for (size_t i = 0; i < M; i++)
+		m_bp[i] = obj_.m_bp[i];
 }
 
 SimplxTable::SimplxTable(size_t test)
-	: N(4), M(3), m_matrx(new double*[N]),
-	m_limits(new double[N]), m_delta(new double[N]), m_objFunc(new ObjFunc(3))
+	: N(3), M(3), m_matrx(new double*[M]),
+	m_limits(new double[N]), m_delta(new double[N]),
+	m_objFunc(new ObjFunc(3))
 {
 
-	for (size_t i = 0; i < N; i++)
-		m_matrx[i] = new double[M];
+	m_bp = new string[M];
+	m_fp = new string[N];
+
+	for (size_t i = 0; i < M; i++)
+		m_matrx[i] = new double[N];
 
 	for (size_t i = 0; i < N; i++)
 	{
@@ -73,7 +98,7 @@ SimplxTable::SimplxTable(size_t test)
 	m_limits[0] = 180;
 	m_limits[1] = 210;
 	m_limits[2] = 244;
-	m_limits[3] = 0;
+	
 
 	m_matrx[0][0] = 4;
 	m_matrx[0][1] = 2;
@@ -87,10 +112,15 @@ SimplxTable::SimplxTable(size_t test)
 	m_matrx[2][1] = 2;
 	m_matrx[2][2] = 5;
 
-	m_objFunc[0] = -10;
-	m_objFunc[1] = -14;
-	m_objFunc[2] = -12;
+	
+	(*m_objFunc)[0] = -10;
+	(*m_objFunc)[1] = -14;
+	(*m_objFunc)[2] = -12;
 
+	(*m_objFunc).setMod(MAX);
+
+	setStrings();
+	
 }
 
 void SimplxTable::setupFile(const char* fname) {
@@ -140,7 +170,24 @@ void SimplxTable::setupFile(const char* fname) {
 
 
 void SimplxTable::print() const {
-	
+	cout <<"BP\t" <<"1\t";
+	for (size_t i = 0; i < N; i++)
+		cout << m_fp[i] << '\t';
+	cout << "delta\n";
+
+	for(size_t i = 0; i < M; i++)
+	{
+		cout << m_bp[i] << '\t';
+		cout << m_limits[i] << '\t';
+		for (size_t j = 0; j < N; j++)
+			cout << m_matrx[i][j] << '\t';
+		cout << m_delta[i] << endl;
+	}
+
+	cout << m_objFunc->getResult() << '\t';
+	for (size_t i = 0; i < N; i++)
+		cout << (*m_objFunc)[i] << '\t';
+	cout << endl;
 }
 
 
@@ -177,7 +224,29 @@ void SimplxTable::parseLimit(string line, size_t ind) {
 	
 }
 
-pair<size_t, size_t> SimplxTable::madMax() {
+void SimplxTable::madMax(pair<size_t, size_t> ind) {
+	
+
+	//auto ind = initDelta();
+	double obj_elem = m_matrx[ind.first][ind.second];	// разрешающий элемент
+
+	m_matrx[ind.first][ind.second] = 1.0 / obj_elem;
+	m_limits[ind.first] /= obj_elem;
+
+
+	for (size_t i = 0; i < N; i++)
+		if (i != ind.second)
+			m_matrx[ind.first][i] /= obj_elem;
+
+	(*m_objFunc)[ind.second] /= -obj_elem;
+	for (size_t i = 0; i < M; i++)
+		if (i != ind.first)
+			m_matrx[i][ind.second] /= -obj_elem;
+
+	//return {ind.first, ind.second};
+}
+
+std::pair<size_t, size_t> SimplxTable::initDelta() {
 	size_t ind_row = m_objFunc->indObjRow();
 	size_t count = M;
 
@@ -187,42 +256,66 @@ pair<size_t, size_t> SimplxTable::madMax() {
 		m_delta[i] = m_limits[i] / m_matrx[i][ind_row];
 
 	size_t ind_line = ind_min(m_delta, count);
-	double obj_elem = m_matrx[ind_line][ind_row];	// разрешающий элемент
-
-	m_matrx[ind_line][ind_row] = 1.0 / obj_elem;
-	m_limits[ind_line] /= obj_elem;
-
-
-	for (size_t i = 0; i < N; i++)
-		if (i != ind_row)
-			m_matrx[ind_line][i] /= obj_elem;
-
-	(*m_objFunc)[ind_row] /= -obj_elem;
-	for (size_t i = 0; i < M; i++)
-		if (i != ind_line)
-			m_matrx[i][ind_row] /= -obj_elem;
-
-	return {ind_line, ind_row};
+	return { ind_line, ind_row };
 }
 
-void SimplxTable::kizaroo(size_t i, size_t j) {
-	// правило прямоугольника
-	std::swap<string>(m_bp[i], m_fp[j]);
 
-	double obj_elem = 1.0 / m_matrx[i][j];
+void SimplxTable::kizaroo2(size_t indL, size_t indR) {
+	swap<string>(m_bp[indL], m_fp[indR]);
+	//swap(m_bp[indL], m_fp[indR]);
 
+	double obj_elem = m_matrx[indL][indR];
+	double obj_lim_el = m_limits[indL];
+
+	double obj_row_el;
+	for (size_t i = 0; i < M; i++)
+		if (i != indL)
+		{
+			obj_row_el = m_matrx[i][indR];
+
+			m_limits[i] = m_limits[i] - obj_lim_el * obj_row_el / obj_elem;
+		}
+	
+	double rez = m_objFunc->getResult();
+	m_objFunc->setResult(rez - obj_lim_el * (*m_objFunc)[indR] / obj_elem);
+
+	for (size_t i = 0; i < N; i++)
+	{
+		obj_row_el = m_matrx[indL][i];
+		if (i != indR) {
+			for (size_t j = 0; j < M; j++)
+				if (j != indL)
+					m_matrx[j][i] -= obj_row_el * m_matrx[j][indR] / obj_elem;
+
+			(*m_objFunc)[i] -= obj_row_el * (*m_objFunc)[indR] / obj_elem;
+		}
+	}
+	
 }
 
 SimplxTable::ObjFunc simplx_method(SimplxTable table) {
 	while (!table.m_objFunc->isFinished()) {
-		pair<size_t, size_t> konteiner = table.madMax();	// пересчет таблицы
 		
-		table.kizaroo(konteiner.first, konteiner.second);
-		
-		
-		for (size_t i = 0; i < )
-		// правило прямоугольника
-	}
+		auto ind = table.initDelta();
+		double* objRow = new double[table.M + 1];
 
+		for (size_t i = 0; i < table.M; i++)
+			objRow[i] = table.m_matrx[i][ind.second];
+		objRow[table.M] = (*table.m_objFunc)[ind.second];
+
+		double* objLine = new double[table.N + 1];
+		objLine[0] = table.m_limits[ind.first];
+		for (size_t i = 0; i < table.N; i++)
+			objLine[i + 1] = table.m_matrx[ind.first][i];
+		
+		table.kizaroo2(ind.first, ind.second);
+		table.madMax(ind);
+		table.print();
+
+		cout << endl;
+		// правило прямоугольника
+
+	}
+	return *table.m_objFunc;
 }
 
